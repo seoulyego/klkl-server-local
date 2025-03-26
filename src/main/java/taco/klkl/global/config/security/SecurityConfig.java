@@ -50,69 +50,60 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
-			// disable csrf
-			.csrf(AbstractHttpConfigurer::disable)
+				// disable csrf
+				.csrf(AbstractHttpConfigurer::disable)
 
-			// configure cors
-			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				// configure cors
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-			// disable default authentication
-			.httpBasic(AbstractHttpConfigurer::disable)
+				// disable default authentication
+				.httpBasic(AbstractHttpConfigurer::disable)
 
-			// disable default login form
-			.formLogin(AbstractHttpConfigurer::disable)
+				// disable default login form
+				.formLogin(AbstractHttpConfigurer::disable)
 
-			// disable X-Frame-Options (enable h2-console)
-			.headers((headers) ->
-				headers.contentTypeOptions(contentTypeOptionsConfig ->
-					headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-			)
+				// disable X-Frame-Options (enable h2-console)
+				.headers((headers) -> headers
+						.contentTypeOptions(contentTypeOptionsConfig -> headers
+								.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)))
 
-			// disable session
-			.sessionManagement(sessionManagement ->
-				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			)
+				// disable session
+				.sessionManagement(
+						sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-			// request authentication & authorization
-			.authorizeHttpRequests(authorizeRequests ->
-				authorizeRequests
-					.requestMatchers(HttpMethod.POST).hasAnyRole(USER.name(), ADMIN.name())
-					.requestMatchers(HttpMethod.PUT).hasAnyRole(USER.name(), ADMIN.name())
-					.requestMatchers(HttpMethod.DELETE).hasAnyRole(USER.name(), ADMIN.name())
-					.requestMatchers(getUserRoleEndpoints()).hasRole(USER.name())
-					.requestMatchers(getBothEndpoints()).permitAll()
-					.requestMatchers(getPublicEndpoints()).permitAll()
-					.anyRequest().authenticated()
-			)
+				// request authentication & authorization
+				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+						.requestMatchers(HttpMethod.POST).hasAnyRole(USER.name(), ADMIN.name())
+						.requestMatchers(HttpMethod.PUT).hasAnyRole(USER.name(), ADMIN.name())
+						.requestMatchers(HttpMethod.DELETE).hasAnyRole(USER.name(), ADMIN.name())
+						.requestMatchers(getUserRoleEndpoints()).hasRole(USER.name())
+						.requestMatchers(getBothEndpoints()).permitAll()
+						.requestMatchers(getPublicEndpoints()).permitAll()
+						.anyRequest().authenticated())
 
-			// oauth2
-			.oauth2Login(oauth2 ->
-				oauth2
-					.userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
-					.successHandler(oAuth2SuccessHandler)
-					.authorizationEndpoint(authorization -> authorization
-						.baseUri("/v1/oauth2/authorization"))
-					.redirectionEndpoint(redirection -> redirection
-						.baseUri("/v1/login/oauth2/code/*"))
-			)
+				// oauth2
+				.oauth2Login(oauth2 -> oauth2
+						.userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
+						.successHandler(oAuth2SuccessHandler)
+						.authorizationEndpoint(authorization -> authorization
+								.baseUri("/v1/oauth2/authorization"))
+						.redirectionEndpoint(redirection -> redirection
+								.baseUri("/v1/login/oauth2/code/*")))
 
-			// configure logout
-			.logout(logout -> logout
-				.logoutUrl("/v1/logout")
-				.addLogoutHandler(customLogoutHandler)
-				.logoutSuccessHandler(customLogoutSuccessHandler)
-				.permitAll()
-			)
+				// configure logout
+				.logout(logout -> logout
+						.logoutUrl("/v1/logout")
+						.addLogoutHandler(customLogoutHandler)
+						.logoutSuccessHandler(customLogoutSuccessHandler)
+						.permitAll())
 
-			// auth exception handling
-			.exceptionHandling(exception ->
-				exception
-					.accessDeniedHandler(accessDeniedHandler)
-					.authenticationEntryPoint(authenticationEntryPoint)
-			)
+				// auth exception handling
+				.exceptionHandling(exception -> exception
+						.accessDeniedHandler(accessDeniedHandler)
+						.authenticationEntryPoint(authenticationEntryPoint))
 
-			// jwt exception handling
-			.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				// jwt exception handling
+				.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return httpSecurity.build();
 	}
@@ -132,7 +123,13 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("https://klkl.kr", "https://www.klkl.kr"));
+
+		// 로컬 개발 환경의 다양한 출처 허용
+		configuration.setAllowedOrigins(List.of(
+				"http://localhost:3000",
+				"http://127.0.0.1:3000",
+				"http://localhost:8080",
+				"http://127.0.0.1:8080"));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setAllowCredentials(true);
