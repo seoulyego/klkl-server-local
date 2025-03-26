@@ -1,6 +1,7 @@
 services:
   spring:
-    image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+    # image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+    build: .
     ports:
       - "8080:8080"
     container_name: "klkl-server"
@@ -23,7 +24,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 5
