@@ -13,11 +13,8 @@ RUN ./gradlew build -x test
 # 5. 실제 실행할 이미지 (JAR 파일을 실행할 OpenJDK 이미지)
 FROM openjdk:17-jdk
 
-# 6. JAR_FILE 변수 정의 (빌드된 JAR 파일의 경로 지정)
-ARG JAR_FILE=./build/libs/klkl-0.0.1-SNAPSHOT.jar
-
-# 7. 빌드된 JAR 파일을 실행 환경으로 복사
+# 6. 빌드된 JAR 파일을 실행 환경으로 복사
 COPY --from=build /app/build/libs/klkl-0.0.1-SNAPSHOT.jar /app.jar
 
-# 8. 시스템 진입점 정의 (JAR 파일 실행)
+# 7. 시스템 진입점 정의 (JAR 파일 실행)
 ENTRYPOINT ["java", "-jar", "/app.jar"]
